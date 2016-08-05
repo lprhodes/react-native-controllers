@@ -183,6 +183,13 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     return;
   }
   
+  // setNavigatorEventID
+  if ([performAction isEqualToString:@"setNavigatorEventID"])
+  {
+    self.navigatorEventID = actionParams[@"navigatorEventID"];
+    return;
+  }
+  
   // setTitle
   if ([performAction isEqualToString:@"setTitle"])
   {

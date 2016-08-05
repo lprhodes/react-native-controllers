@@ -7,6 +7,7 @@
 #import "RCCManager.h"
 #import "RCTConvert.h"
 #import "RCCExternalViewControllerProtocol.h"
+#import "RCTEventDispatcher.h"
 
 const NSInteger BLUR_STATUS_TAG = 78264801;
 const NSInteger BLUR_NAVBAR_TAG = 78264802;
@@ -163,9 +164,34 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
-    
-    [self setStyleOnAppear];
+  RCCNavigationController *navController = self.navigationController;
+  
+  NSString *callbackId = navController.navigatorEventID;
+  if (callbackId) {
+    [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:callbackId body:@
+     {
+       @"type": @"WillFocus"
+     }];
+  }
+  
+  [super viewWillAppear:animated];
+  
+  [self setStyleOnAppear];
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+  RCCNavigationController *navController = self.navigationController;
+  
+  NSString *callbackId = navController.navigatorEventID;
+  if (callbackId) {
+    [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:callbackId body:@
+     {
+       @"type": @"DidFocus"
+     }];
+  }
+  
+  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
