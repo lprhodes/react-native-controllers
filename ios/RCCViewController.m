@@ -181,6 +181,11 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 
 - (void)viewDidAppear:(BOOL)animated
 {
+  // If we're intercepting the back button to perform some kind of action then we don't want users to be able to swipe back
+  if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
+    self.navigationController.interactivePopGestureRecognizer.enabled = !self.shouldInterceptBackButton;
+  }
+
   RCCNavigationController *navController = self.navigationController;
   
   NSString *callbackId = navController.navigatorEventID;
@@ -547,6 +552,17 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
       NSLog(@"addExternalVCIfNecessary: could not create class from string. Check that the proper class name wass passed in ExternalNativeScreenClass");
     }
   }
+}
+
+- (BOOL)navigationShouldPopOnBackButton
+{
+  RCCNavigationController *navController = (RCCNavigationController *)self.navigationController;
+  RCCViewController *viewController = (RCCViewController *)navController.visibleViewController;
+  if (!viewController.shouldInterceptBackButton) return YES;
+  
+  [navController onPop];
+  
+  return NO;
 }
 
 #pragma mark - NewRelic
