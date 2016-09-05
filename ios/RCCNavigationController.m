@@ -3,6 +3,7 @@
 #import "RCCManager.h"
 #import "RCTEventDispatcher.h"
 #import "RCTConvert.h"
+#import <objc/runtime.h>
 
 @implementation RCCNavigationController
 
@@ -36,6 +37,16 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
   {
     [self setButtons:rightButtons viewController:viewController side:@"right" animated:NO];
   }
+  
+  NSArray *focusRefButton = props[@"focusRefButton"];
+  if (!focusRefButton) focusRefButton = props[@"passProps"][@"focusRefButton"];
+
+  if (focusRefButton)
+  {
+    [self setButtons:@[ focusRefButton ] viewController:viewController side:@"focusRef" animated:NO];
+  }
+  
+  
   
   self = [super initWithRootViewController:viewController];
   if (!self) return nil;
@@ -117,6 +128,11 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
       [self setButtons:@[ backButton ] viewController:viewController side:@"back" animated:NO];
     }
     
+    id focusRef = actionParams[@"focusRefButton"];
+    if (focusRef) {
+      [self setButtons:@[ focusRef ] viewController:viewController side:@"focusRef" animated:NO];
+    }
+    
     NSArray *leftButtons = actionParams[@"leftButtons"];
     if (leftButtons)
     {
@@ -166,6 +182,11 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     id backButton = actionParams[@"backButton"];
     if (backButton) {
       [self setButtons:@[ backButton ] viewController:viewController side:@"back" animated:NO];
+    }
+    
+    id focusRef = actionParams[@"focusRefButton"];
+    if (focusRef) {
+      [self setButtons:@[ focusRef ] viewController:viewController side:@"focusRef" animated:NO];
     }
     
     NSArray *leftButtons = actionParams[@"leftButtons"];
@@ -230,7 +251,7 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     topViewController.navigatorStyle[@"navBarHidden"] = setHidden;
     [topViewController setNavBarVisibilityChange:animatedBool];
     
-    }
+  }
 }
 
 -(void)onButtonPress:(UIBarButtonItem*)barButtonItem
@@ -268,7 +289,12 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
     {
       barButtonItem = [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:@selector(onButtonPress:)];
     }
+    else if ([side isEqualToString:@"focusRef"])
+    {
+      barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+    }
     else continue;
+    
     objc_setAssociatedObject(barButtonItem, &CALLBACK_ASSOCIATED_KEY, button[@"onPress"], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [barButtonItems addObject:barButtonItem];
     
@@ -310,6 +336,11 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
   if ([side isEqualToString:@"back"] && barButtonItems.count > 0)
   {
     viewController.backButtonItem = barButtonItems[0];
+  }
+  
+  if ([side isEqualToString:@"focusRef"] && barButtonItems.count > 0)
+  {
+    viewController.focusRef = barButtonItems[0];
   }
 }
 

@@ -8,6 +8,7 @@
 #import "RCTConvert.h"
 #import "RCCExternalViewControllerProtocol.h"
 #import "RCTEventDispatcher.h"
+#import <objc/runtime.h>
 
 const NSInteger BLUR_STATUS_TAG = 78264801;
 const NSInteger BLUR_NAVBAR_TAG = 78264802;
@@ -185,10 +186,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]) {
     self.navigationController.interactivePopGestureRecognizer.enabled = !self.shouldInterceptBackButton;
   }
-
-  RCCNavigationController *navController = self.navigationController;
   
-  NSString *callbackId = navController.navigatorEventID;
+  
+  NSString *callbackId = objc_getAssociatedObject(self.focusRef, &CALLBACK_ASSOCIATED_KEY);
   if (callbackId) {
     [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:callbackId body:@
      {
@@ -204,6 +204,14 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     [super viewWillDisappear:animated];
     
     [self setStyleOnDisappear];
+  
+    NSString *callbackId = objc_getAssociatedObject(self.focusRef, &CALLBACK_ASSOCIATED_KEY);
+    if (callbackId) {
+      [[[RCCManager sharedInstance] getBridge].eventDispatcher sendAppEventWithName:callbackId body:@
+       {
+         @"type": @"WillBlur"
+       }];
+    }
 }
 
 // most styles should be set here since when we pop a view controller that changed them

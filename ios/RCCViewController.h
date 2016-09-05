@@ -6,6 +6,7 @@
 @property (nonatomic) NSMutableDictionary *navigatorStyle;
 @property (nonatomic) BOOL navBarHidden;
 @property (strong, nonnull) UIBarButtonItem *backButtonItem;
+@property (strong, nonnull) id focusRef;
 @property (nonatomic) BOOL shouldInterceptBackButton;
 
 + (UIViewController*)controllerWithLayout:(NSDictionary *)layout globalProps:(NSDictionary *)globalProps bridge:(RCTBridge *)bridge;
